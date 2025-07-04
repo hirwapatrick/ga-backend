@@ -10,7 +10,7 @@ const app = express();
 const PORT = 5000;
 
 // Middleware
-app.use(cors({ origin: "https://getagasobanuye.onrender.com" }));
+app.use(cors({ origin: "https://getagasobanuye.vercel.app/" }));
 app.use(express.json());
 app.use("/poster", express.static(path.join(__dirname, "public/poster")));
 

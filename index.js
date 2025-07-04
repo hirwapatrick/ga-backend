@@ -47,6 +47,10 @@ app.get("/", (req, res) => {
   res.send("Backend is working!");
 });
 
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build/index.html"));
+});
+
 // ========== MOVIE ROUTES ==========
 
 app.get("/movies", async (req, res) => {

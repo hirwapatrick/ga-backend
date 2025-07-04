@@ -10,7 +10,7 @@ const app = express();
 const PORT = 5000;
 
 // Middleware
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "https://getagasobanuye.vercel.app" }));
 app.use(express.json());
 app.use("/poster", express.static(path.join(__dirname, "public/poster")));
 
@@ -31,10 +31,10 @@ let connection;
 async function connectDB() {
   try {
     connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "",
-      database: "getagasobanuye",
+      host: "sql3.freesqldatabase.com",
+      user: "sql3788352",
+      password: "j8nKDwXVnz",
+      database: "sql3788352",
     });
     console.log("✅ Connected to MySQL");
   } catch (err) {
@@ -43,6 +43,9 @@ async function connectDB() {
   }
 }
 connectDB();
+app.get("/", (req, res) => {
+  res.send("Backend is working!");
+});
 
 // ========== MOVIE ROUTES ==========
 
@@ -271,6 +274,6 @@ app.post("/admin/login", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT,'0.0.0.0', () => {
+  console.log(`Server is running`);
 });

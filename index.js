@@ -31,7 +31,7 @@ let connection;
 async function connectDB() {
   try {
     connection = await mysql.createConnection({
-      host: "sql100.infinityfree.com",
+      host: "sql123.infinityfree.com",
       user: "if0_39391401",
       password: "5DpQIkGm5DqL05",
       database: "if0_39391401_getagasobanuyedb",

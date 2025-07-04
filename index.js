@@ -10,7 +10,7 @@ const app = express();
 const PORT = 5000;
 
 // Middleware
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: "https://getagasobanuyemovies.onrender.com" }));
 app.use(express.json());
 app.use("/poster", express.static(path.join(__dirname, "public/poster")));
 

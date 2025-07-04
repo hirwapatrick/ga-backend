@@ -31,10 +31,10 @@ let connection;
 async function connectDB() {
   try {
     connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "",
-      database: "getagasobanuye",
+      host: "sql100.infinityfree.com",
+      user: "if0_39391401",
+      password: "5DpQIkGm5DqL05",
+      database: "if0_39391401_getagasobanuyedb",
     });
     console.log("✅ Connected to MySQL");
   } catch (err) {

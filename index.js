@@ -31,10 +31,10 @@ let connection;
 async function connectDB() {
   try {
     connection = await mysql.createConnection({
-      host: "sql123.infinityfree.com",
-      user: "if0_39391401",
-      password: "5DpQIkGm5DqL05",
-      database: "if0_39391401_getagasobanuyedb",
+      host: "sql3.freesqldatabase.com",
+      user: "sql3788352",
+      password: "j8nKDwXVnz",
+      database: "sql3788352",
     });
     console.log("✅ Connected to MySQL");
   } catch (err) {
@@ -272,5 +272,5 @@ app.post("/admin/login", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server is running`);
 });

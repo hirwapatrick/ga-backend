@@ -10,7 +10,13 @@ const app = express();
 const PORT = 5000;
 
 // ✅ CORS and JSON
-app.use(cors({ origin: "https://www.getagasobanuye.xyz" }));
+app.use(
+  cors({
+    origin: ["https://getagasobanuye.xyz", "https://www.getagasobanuye.xyz"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // ✅ Cloudinary Configuration

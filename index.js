@@ -25,7 +25,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "movie_posters",
-    allowed_formats: ["jpg", "png", "jpeg"],
+    allowed_formats: ["jpg", "png", "jpeg","webp"],
     transformation: [{ width: 600, height: 800, crop: "limit" }],
   },
 });

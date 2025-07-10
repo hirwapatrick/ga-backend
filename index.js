@@ -60,7 +60,7 @@ app.get("/movies", async (req, res) => {
   const offset = (page - 1) * limit;
   try {
     const [rows] = await pool.query(
-      `SELECT id, title, genre, release_year, description, trailer_url, video_url, download_url, likes, movie_poster FROM movies ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      `SELECT id, title, genre, release_year, description, trailer_url, video_url, download_url, likes, movie_poster, created_at FROM movies ORDER BY created_at DESC LIMIT ? OFFSET ?`,
       [limit, offset]
     );
     res.json(rows);

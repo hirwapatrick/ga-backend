@@ -56,17 +56,20 @@ app.get('/', (req, res) => {
 
 // --- MOVIES ---
 
+
 app.get('/movies', async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
   try {
-    const [rows] = await pool.query(
-      `SELECT id, title, genre, release_year, description, trailer_url, video_url, download_url, likes, movie_poster FROM movies ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-      [limit, offset]
-    );
-    res.json(rows);
+    const movies = await Movie.find({})
+      .sort({ created_at: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select("id title genre release_year description trailer_url video_url download_url likes movie_poster");
+
+    res.json(movies);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

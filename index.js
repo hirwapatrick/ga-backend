@@ -72,19 +72,19 @@ app.get('/movies/admin', async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
+  const q = req.query.q || "";
 
   try {
-    const movies = await Movie.find({})
+    const query = q
+      ? { title: { $regex: q, $options: 'i' } }
+      : {};
+
+    const movies = await Movie.find(query)
       .sort({ created_at: -1 })
       .skip(skip)
       .limit(limit);
 
-    const formatted = movies.map(m => ({
-      ...m._doc,
-      id: m._id.toString(),
-      _id: undefined,
-    }));
-
+    const formatted = movies.map(m => ({ ...m._doc, id: m._id, _id: undefined }));
     res.json(formatted);
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -67,7 +67,7 @@ app.get('/movies', async (req, res) => {
       .sort({ created_at: -1 })
       .skip(skip)
       .limit(limit)
-      .select("id title genre release_year description trailer_url video_url download_url likes movie_poster");
+      .select("id title genre release_year description trailer_url video_url download_url likes movie_poster created_at");
 
     res.json(movies);
   } catch (err) {

@@ -22,41 +22,38 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Cloudinary config
+// ✅ Cloudinary Config
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Multer + Cloudinary storage
+// ✅ Multer + Cloudinary Storage
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "movie_posters",
-    allowed_formats: ["jpg", "png", "jpeg","webp"],
+    allowed_formats: ["jpg", "png", "jpeg", "webp"],
     transformation: [{ width: 600, height: 800, crop: "limit" }],
   },
 });
 const upload = multer({ storage });
 
-// Connect to MongoDB
+// ✅ MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log("✅ MongoDB connected"))
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
-// ====== ROUTES ======
+// ========== ROUTES ==========
 
-// Root test
 app.get('/', (req, res) => {
   res.send('Backend is working!');
 });
 
-// --- MOVIES ---
-
-
+// --- Movies ---
 app.get('/movies', async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -66,10 +63,10 @@ app.get('/movies', async (req, res) => {
     const movies = await Movie.find({})
       .sort({ created_at: -1 })
       .skip(skip)
-      .limit(limit)
-      .select("id title genre release_year description trailer_url video_url download_url likes movie_poster created_at");
+      .limit(limit);
 
-    res.json(movies);
+    const formatted = movies.map(m => ({ ...m._doc, id: m._id, _id: undefined }));
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -80,9 +77,9 @@ app.get('/search', async (req, res) => {
   if (!q) return res.status(400).json({ error: "Query parameter 'q' is required" });
 
   try {
-    // Case-insensitive partial match on title
-    const movies = await Movie.find({ title: new RegExp(q, 'i') }).select('id title genre release_year description');
-    res.json(movies);
+    const movies = await Movie.find({ title: new RegExp(q, 'i') });
+    const formatted = movies.map(m => ({ ...m._doc, id: m._id, _id: undefined }));
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -92,7 +89,7 @@ app.get('/movies/:id', async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
     if (!movie) return res.status(404).json({ error: 'Movie not found' });
-    res.json(movie);
+    res.json({ ...movie._doc, id: movie._id, _id: undefined });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -105,10 +102,10 @@ app.get('/movies/:id/related', async (req, res) => {
 
     const related = await Movie.find({ genre: movie.genre, _id: { $ne: movie._id } })
       .sort({ created_at: -1 })
-      .limit(5)
-      .select('id title genre release_year movie_poster');
+      .limit(5);
 
-    res.json(related);
+    const formatted = related.map(m => ({ ...m._doc, id: m._id, _id: undefined }));
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -160,9 +157,7 @@ app.put('/movies/:id', upload.single('movie_poster'), async (req, res) => {
       download_url: download_url || null,
     };
 
-    if (req.file) {
-      movieData.movie_poster = req.file.path;
-    }
+    if (req.file) movieData.movie_poster = req.file.path;
 
     const updatedMovie = await Movie.findByIdAndUpdate(req.params.id, movieData, { new: true });
     if (!updatedMovie) return res.status(404).json({ error: 'Movie not found' });
@@ -175,9 +170,8 @@ app.put('/movies/:id', upload.single('movie_poster'), async (req, res) => {
 
 app.delete('/movies/:id', async (req, res) => {
   try {
-    const deletedMovie = await Movie.findByIdAndDelete(req.params.id);
-    if (!deletedMovie) return res.status(404).json({ error: 'Movie not found' });
-
+    const deleted = await Movie.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Movie not found' });
     res.json({ message: 'Movie deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -192,7 +186,6 @@ app.post('/movies/:id/like', async (req, res) => {
       { new: true }
     );
     if (!movie) return res.status(404).json({ error: 'Movie not found' });
-
     res.json({ message: 'Movie liked' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -215,12 +208,12 @@ app.post('/movies/:id/unlike', async (req, res) => {
   }
 });
 
-// --- COMMENTS ---
-
+// --- Comments ---
 app.get('/movies/:id/comments', async (req, res) => {
   try {
     const comments = await Comment.find({ movie_id: req.params.id }).sort({ created_at: -1 });
-    res.json(comments);
+    const formatted = comments.map(c => ({ ...c._doc, id: c._id, _id: undefined }));
+    res.json(formatted);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -228,8 +221,8 @@ app.get('/movies/:id/comments', async (req, res) => {
 
 app.post('/movies/:id/comments', async (req, res) => {
   const { email, comment_text } = req.body;
-  if (!email || email.trim() === '') return res.status(400).json({ error: 'Email cannot be empty' });
-  if (!comment_text || comment_text.trim() === '') return res.status(400).json({ error: 'Comment text cannot be empty' });
+  if (!email?.trim()) return res.status(400).json({ error: 'Email cannot be empty' });
+  if (!comment_text?.trim()) return res.status(400).json({ error: 'Comment text cannot be empty' });
 
   try {
     const newComment = new Comment({
@@ -237,8 +230,8 @@ app.post('/movies/:id/comments', async (req, res) => {
       email: email.trim(),
       comment_text: comment_text.trim(),
     });
-    const savedComment = await newComment.save();
-    res.status(201).json(savedComment);
+    const saved = await newComment.save();
+    res.status(201).json({ ...saved._doc, id: saved._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -246,17 +239,15 @@ app.post('/movies/:id/comments', async (req, res) => {
 
 app.delete('/comments/:id', async (req, res) => {
   try {
-    const deletedComment = await Comment.findByIdAndDelete(req.params.id);
-    if (!deletedComment) return res.status(404).json({ error: 'Comment not found' });
-
+    const deleted = await Comment.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Comment not found' });
     res.json({ message: 'Comment deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// --- ADMIN LOGIN ---
-
+// --- Admin Login ---
 app.post('/admin/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
@@ -274,7 +265,7 @@ app.post('/admin/login', async (req, res) => {
   }
 });
 
-// Start server
+// Start Server
 app.listen(PORT, () => {
   console.log(`✅ Server is running on port ${PORT}`);
 });
